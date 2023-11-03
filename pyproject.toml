@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "epss-client"
+version = "0.1.0"
+description = "A Python library for downloading, processing, and analyzing EPSS scores\""
+authors = ["Tyler Fisher <tylerfisher@tylerfisher.ca>"]
+readme = "README.md"
+packages = [{include = "epss"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.31.0"
+pandas = "^2.1.0"
+click = "^8.1.7"
+tqdm = "^4.66.1"
+
+[tool.poetry.scripts]
+epss = "epss.cli:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
