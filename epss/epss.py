@@ -103,26 +103,6 @@ class Client:
             min_date=min_date,
             max_date=max_date,
         )
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = {}
-            for date in iter_dates(min_date=min_date, max_date=max_date):
-                future = executor.submit(
-                    self.get_scores_by_date,
-                    date=date,
-                    cve_ids=cve_ids,
-                    min_score=min_score,
-                    max_score=max_score,
-                    min_percentile=min_percentile,
-                    max_percentile=max_percentile,
-                )
-                futures[future] = date
-
-            for future in concurrent.futures.as_completed(futures):
-                date = futures[future]
-                df = future.result()
-                if not df.empty:
-                    yield date, df
-
         for date in iter_dates(min_date=min_date, max_date=max_date):
             df = self.get_scores_by_date(
                 date=date,

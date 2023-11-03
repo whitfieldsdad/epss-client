@@ -123,6 +123,61 @@ def list_scores(
             raise ValueError(f"Invalid output format: {output_format}")
 
 
+@cli.command("count-scores")
+@click.argument("cve_ids", nargs=-1)
+@click.option("--date")
+@click.option("--min-date")
+@click.option("--max-date")
+@click.option(
+    "--output-format",
+    type=click.Choice([JSON, CSV]),
+    default=JSON,
+    show_default=True,
+)
+@click.option("--min-score", "min_score", type=float)
+@click.option("--max-score", "max_score", type=float)
+@click.option("--min-percentile", type=float)
+@click.option("--max-percentile", type=float)
+@click.option("--latest/--all", "download_latest", default=True, show_default=True)
+def count_scores(
+    cve_ids: Optional[Iterable[str]],
+    date: Optional[str],
+    min_date: Optional[str],
+    max_date: Optional[str],
+    output_format: str,
+    min_score: Optional[float],
+    max_score: Optional[float],
+    min_percentile: Optional[float],
+    max_percentile: Optional[float],
+    download_latest: bool,
+):
+    """
+    Count EPSS scores.
+    """
+    client = Client()
+    if date:
+        min_date = max_date = date
+    elif download_latest:
+        min_date = max_date = client.get_max_date()
+    else:
+        min_date = min_date or client.get_min_date()
+        max_date = max_date or client.get_max_date()
+
+    scores = client.iter_scores_grouped_by_date(
+        min_date=min_date,
+        max_date=max_date,
+        cve_ids=cve_ids,
+        min_score=min_score,
+        max_score=max_score,
+        min_percentile=min_percentile,
+        max_percentile=max_percentile,
+    )
+    total = 0
+    for _, df in scores:
+        total += len(df)
+    print(total)
+
+
 @cli.command("download-scores")
 @click.option("--date")
 @click.option("--min-date")
@@ -135,7 +190,7 @@ def download_scores(
     download_latest: bool,
 ):
     """
-    List EPSS scores.
+    Download EPSS scores.
     """
     client = Client()
     if date:
